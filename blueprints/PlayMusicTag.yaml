@@ -42,7 +42,7 @@ action:
               entity_id: !input player
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.source == "m3u" }}'
+            value_template: "{{ trigger.event.data.source == \"m3u\" }}"
         sequence:
           - service: media_player.play_media
             data:
