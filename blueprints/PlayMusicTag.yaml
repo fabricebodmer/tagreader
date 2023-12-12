@@ -25,7 +25,7 @@ trigger:
     event_type: esphome.music_tag
 condition:
   - condition: template
-    value_template: '{{ trigger.event.data.reader == reader }}'
+    value_template: '{{ trigger.event.data.reader == !input reader }}'
 action:
   - service: media_player.media_stop
     target:
