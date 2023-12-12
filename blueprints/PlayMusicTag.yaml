@@ -25,7 +25,7 @@ trigger:
     event_type: esphome.music_tag
 condition:
   - condition: template
-    value_template: '{{ trigger.event.data.reader == reader }}'
+    value_template: "{{ trigger.event.data.reader == reader }}"
 action:
   - service: media_player.media_stop
     target:
@@ -33,18 +33,28 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.source == "sonos" }}'
+            value_template: "{{ trigger.event.data.source == \"sonos\" }}"
         sequence:
           - service: media_player.select_source
             data:
-              source: '{{ trigger.event.data.info }}'
+              source: "{{ trigger.event.data.info }}"
+            target:
+              entity_id: !input player
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.event.data.source == \"m3u\" }}"
+        sequence:
+          - service: media_player.play_media
+            data:
+              media_content_type: music
+              media_content_id: "x-rincon-mp3radio://{{ trigger.event.data.url }}"
             target:
               entity_id: !input player
     default:
       - service: media_player.play_media
         data:
           media_content_type: music
-          media_content_id: '{{ trigger.event.data.url }}'
+          media_content_id: "{{ trigger.event.data.url }}"
         target:
           entity_id: !input player
 mode: queued
