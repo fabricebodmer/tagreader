@@ -29,7 +29,7 @@ condition:
 action:
   - service: notify.mobile_app_iphone_de_fabrice
     data:
-      message: "{{trigger.event.data.reader}}"
+      message: "reader"
   - service: media_player.media_stop
     target:
       entity_id: !input player
