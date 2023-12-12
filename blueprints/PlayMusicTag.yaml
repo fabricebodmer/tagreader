@@ -18,7 +18,7 @@ blueprint:
 
 variables:
     device_id: !input reader_id
-    reader: '{{ device_attr(!input reader_id, "name") }}'
+    reader: '{{ device_attr(device_id, "name") }}'
 
 trigger:
   - platform: event
@@ -27,6 +27,9 @@ condition:
   - condition: template
     value_template: "{{ trigger.event.data.reader == \"tagreader-4b1247\" }}"
 action:
+  - service: notify.mobile_app_iphone_de_fabrice
+    data:
+      message: "{{trigger.event.data.reader}}"
   - service: media_player.media_stop
     target:
       entity_id: !input player
