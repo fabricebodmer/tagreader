@@ -25,11 +25,11 @@ trigger:
     event_type: esphome.music_tag
 condition:
   - condition: template
-    value_template: "{{ trigger.event.data.reader == device_id }}"
+    value_template: "{{ (trigger.event.data.reader|upper) == (reader|upper) }}"
 action:
   - service: notify.mobile_app_iphone_de_fabrice
     data:
-      message: device_id
+      message: reader
   - service: media_player.media_stop
     target:
       entity_id: !input player
