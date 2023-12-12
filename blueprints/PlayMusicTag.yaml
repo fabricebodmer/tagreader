@@ -40,6 +40,16 @@ action:
               source: '{{ trigger.event.data.info }}'
             target:
               entity_id: !input player
+      - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.source == "m3u" }}'
+        sequence:
+          - service: media_player.play_media
+            data:
+              media_content_type: music
+              media_content_id: "x-rincon-mp3radio://{{ trigger.event.data.url }}"
+            target:
+              entity_id: !input player
     default:
       - service: media_player.play_media
         data:
