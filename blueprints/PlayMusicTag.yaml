@@ -33,7 +33,7 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: '{{ trigger.event.data.source == "sonos" }}'
+            value_template: '{{ trigger.event.data.source == \"sonos\" }}'
         sequence:
           - service: media_player.select_source
             data:
