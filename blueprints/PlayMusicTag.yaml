@@ -27,9 +27,6 @@ condition:
   - condition: template
     value_template: "{{ (trigger.event.data.reader|upper) == (reader|upper) }}"
 action:
-  - service: notify.mobile_app_iphone_de_fabrice
-    data:
-      message: reader
   - service: media_player.media_stop
     target:
       entity_id: !input player
