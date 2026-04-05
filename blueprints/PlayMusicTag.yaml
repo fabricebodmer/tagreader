@@ -51,7 +51,7 @@ action:
             target:
               entity_id: !input player
     default:
-      - service: media_player.play_media
+      - service: mass.play_media
         data:
           media_content_type: music
           media_content_id: "{{ trigger.event.data.url | replace('https://music.apple.com/', 'apple_music:/') | regex_replace('\\?l=.+$', '') }}"
