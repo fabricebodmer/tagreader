@@ -54,7 +54,7 @@ action:
       - service: media_player.play_media
         data:
           media_content_type: music
-          media_content_id: "{{ trigger.event.data.url }}"
+          media_content_id: "{{ rigger.event.data.url | replace('https://music.apple.com/', 'apple_music:/') | regex_replace('\\?l=.+$', '') }}"
         target:
           entity_id: !input player
 mode: queued
