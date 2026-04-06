@@ -59,9 +59,20 @@ action:
               {% set parts = uri.split('?')[0].split('/') %}
               {% set type_map = {'album': 'album', 'song': 'track', 'playlist': 'playlist', 'artist': 'artist'} %}
               {% set apple_type = parts[4] %}
-              {% set item_id = parts[-1] %}
-              {% set media_type = type_map.get(apple_type, 'album') %}
-              {{ 'apple_music://' ~ media_type ~ '/' ~ item_id }}
+              {% set query = uri.split('?')[1] if '?' in uri else '' %}
+              {% set track_id = namespace(value='') %}
+              {% for param in query.split('&') %}
+                {% if param.startswith('i=') %}
+                  {% set track_id.value = param[2:] %}
+                {% endif %}
+              {% endfor %}
+              {% if apple_type == 'album' and track_id.value %}
+                {{ 'apple_music://track/' ~ track_id.value }}
+              {% else %}
+                {% set item_id = parts[-1] %}
+                {% set media_type = type_map.get(apple_type, 'album') %}
+                {{ 'apple_music://' ~ media_type ~ '/' ~ item_id }}
+              {% endif %}
             {% else %}
               {{ uri | regex_replace('\?.*$', '') }}
             {% endif %}
