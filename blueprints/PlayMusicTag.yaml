@@ -17,8 +17,8 @@ blueprint:
           domain: media_player
 
 variables:
-    device_id: !input reader_id
-    reader: '{{ device_attr(device_id, "name") }}'
+  device_id: !input reader_id
+  reader: '{{ device_attr(device_id, "name") }}'
 
 trigger:
   - platform: event
@@ -51,9 +51,8 @@ action:
             target:
               entity_id: !input player
     default:
-      - service: music_assistant.play_media
-        data:
-          media_id: >-
+      - variables:
+          ma_media_id: >-
             {% set uri = trigger.event.data.url %}
             {% if uri.startswith('https://music.apple.com/') %}
               {% set parts = uri.split('?')[0].split('/') %}
@@ -69,14 +68,35 @@ action:
               {% if apple_type == 'album' and track_id.value %}
                 {{ 'apple_music://track/' ~ track_id.value }}
               {% else %}
-                {% set item_id = parts[-1] %}
-                {% set media_type = type_map.get(apple_type, 'album') %}
-                {{ 'apple_music://' ~ media_type ~ '/' ~ item_id }}
+                {{ 'apple_music://' ~ type_map.get(apple_type, 'album') ~ '/' ~ parts[-1] }}
               {% endif %}
             {% else %}
               {{ uri | regex_replace('\?.*$', '') }}
             {% endif %}
-          media_type: album
+          ma_media_type: >-
+            {% set uri = trigger.event.data.url %}
+            {% if uri.startswith('https://music.apple.com/') %}
+              {% set parts = uri.split('?')[0].split('/') %}
+              {% set apple_type = parts[4] %}
+              {% set query = uri.split('?')[1] if '?' in uri else '' %}
+              {% set track_id = namespace(value='') %}
+              {% for param in query.split('&') %}
+                {% if param.startswith('i=') %}
+                  {% set track_id.value = param[2:] %}
+                {% endif %}
+              {% endfor %}
+              {% if apple_type == 'album' and track_id.value %}track
+              {% elif apple_type == 'song' %}track
+              {% elif apple_type == 'playlist' %}playlist
+              {% elif apple_type == 'artist' %}artist
+              {% else %}album
+              {% endif %}
+            {% else %}album
+            {% endif %}
+      - service: music_assistant.play_media
+        data:
+          media_id: "{{ ma_media_id }}"
+          media_type: "{{ ma_media_type }}"
           enqueue: replace
         target:
           entity_id: !input player
