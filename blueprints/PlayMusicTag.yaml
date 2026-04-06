@@ -51,11 +51,10 @@ action:
             target:
               entity_id: !input player
     default:
-      - service: ma.play_media
+      - service: mass.play_media
         data:
-          media_id: "{{ trigger.event.data.url | regex_replace('\\?.*$', '') }}"
-          media_type: album
-          enqueue: replace
+          media_content_type: music
+          media_content_id: "{{ trigger.event.data.url | replace('https://music.apple.com/', 'apple_music:/') | regex_replace('\\?l=.+$', '') }}"
         target:
           entity_id: !input player
 mode: queued
