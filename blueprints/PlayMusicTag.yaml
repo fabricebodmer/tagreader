@@ -51,10 +51,22 @@ action:
             target:
               entity_id: !input player
     default:
-      - service: media_player.play_media
+      - service: music_assistant.play_media
         data:
-          media_content_type: music
-          media_content_id: "{{ trigger.event.data.url }}"
+          media_id: >-
+            {% set uri = trigger.event.data.url %}
+            {% if uri.startswith('https://music.apple.com/') %}
+              {% set parts = uri.split('?')[0].split('/') %}
+              {% set type_map = {'album': 'album', 'song': 'track', 'playlist': 'playlist', 'artist': 'artist'} %}
+              {% set apple_type = parts[4] %}
+              {% set item_id = parts[-1] %}
+              {% set media_type = type_map.get(apple_type, 'album') %}
+              {{ 'apple_music://' ~ media_type ~ '/' ~ item_id }}
+            {% else %}
+              {{ uri | regex_replace('\?.*$', '') }}
+            {% endif %}
+          media_type: album
+          enqueue: replace
         target:
           entity_id: !input player
 mode: queued
