@@ -321,6 +321,11 @@ pn532_i2c:
               id(source) = "mass";
               id(url) = payload;
             }
+            else if (type == "U") {
+              ESP_LOGD("tagreader", "Found generic URL tag NDEF");
+              id(source) = "url";
+              id(url) = payload;
+            }
             else if (type == "T" ) {
               ESP_LOGD("tagreader", "Found music info tag NDEF");
               id(info)=payload;
