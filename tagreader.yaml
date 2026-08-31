@@ -1,8 +1,8 @@
 # Insert your SSID and Your PWD after inital setup
 wifi:
 # networks:
-#    - ssid: 'REPLACEME'          # Enter your WiFi SSID here. Example: `ssid: 'your_network_name'`
-#      password: 'REPLACEME'      # Enter your wifi password here. Example: `password: 'abcde123456'`
+#   - ssid: 'REPLACEME' # Enter your WiFi SSID here. Example: `ssid: 'your_network_name'`
+#     password: 'REPLACEME' # Enter your wifi password here. Example: `password: 'abcde123456'`
   ap:
     ssid: ${name}
 
@@ -13,7 +13,6 @@ dashboard_import:
   package_import_url: github://adonno/tagreader/tagreader.yaml
 
 improv_serial:
-
 
 substitutions:
   name: tagreader
@@ -142,6 +141,7 @@ button:
   - platform: restart
     name: "${friendly_name} Restart"
     entity_category: config
+
 # Enable logging
 logger:
   # level: VERY_VERBOSE
@@ -222,7 +222,7 @@ api:
 
 # Enable OTA upgrade
 ota:
-  - platform: esphome
+- platform: esphome
 
 i2c:
   scan: False
@@ -268,7 +268,6 @@ pn532_i2c:
             size_t applemusic = payload.find("https://music.apple.com");
             size_t spotify = payload.find("https://open.spotify.com");
             size_t sonos = payload.find("sonos-2://");
-
             size_t mass_deezer = payload.find("deezer://");
             size_t mass_filesystem_local = payload.find("filesystem_local://");
             size_t mass_filesystem_smb = payload.find("filesystem_smb://");
@@ -303,16 +302,16 @@ pn532_i2c:
               id(url)=payload;
             }
             else if (type == "U" && (mass_deezer != std::string::npos ||
-                    mass_filesystem_local != std::string::npos ||
-                    mass_filesystem_smb != std::string::npos ||
-                    mass_plex != std::string::npos ||
-                    mass_qobuz != std::string::npos ||
-                    mass_radiobrowser != std::string::npos ||
-                    mass_soundcloud != std::string::npos ||
-                    mass_spotify != std::string::npos ||
-                    mass_tidal != std::string::npos ||
-                    mass_tunein != std::string::npos ||
-                    mass_ytmusic != std::string::npos)) {
+                                      mass_filesystem_local != std::string::npos ||
+                                      mass_filesystem_smb != std::string::npos ||
+                                      mass_plex != std::string::npos ||
+                                      mass_qobuz != std::string::npos ||
+                                      mass_radiobrowser != std::string::npos ||
+                                      mass_soundcloud != std::string::npos ||
+                                      mass_spotify != std::string::npos ||
+                                      mass_tidal != std::string::npos ||
+                                      mass_tunein != std::string::npos ||
+                                      mass_ytmusic != std::string::npos)) {
               ESP_LOGD("tagreader", "Found Music Assistant tag NDEF");
               id(source) = "mass";
               id(url) = payload;
@@ -365,17 +364,191 @@ pn532_i2c:
     then:
     - homeassistant.event:
         event: esphome.tag_removed
+
 # Define the buzzer output
 output:
 - platform: esp8266_pwm
   pin: D7
   id: buzzer
 
+# ---------------------------------------------------------------------------
+# Buttons (merged from the button-capable variant)
+# 4 physical buttons: 3 momentary (short + long press) + 1 toggle
+# Wire momentary buttons to GPIO10 (pin 12), GPIO14 (pin 5), GPIO0 (pin 18)
+# Wire the toggle switch to GPIO16 (pin 4)
+# ---------------------------------------------------------------------------
 binary_sensor:
   - platform: status
     name: "${friendly_name} Status"
     entity_category: diagnostic
 
+  # --- Button 1 ---
+  - platform: gpio
+    name: "Button 1 (raw)"
+    id: button_1_raw
+    pin:
+      number: 10 # pin 12
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    internal: true
+    filters:
+      - delayed_on: 30ms
+      - delayed_off: 30ms
+    on_multi_click:
+      - timing:
+          - ON for 40ms to 400ms
+          - OFF for at least 330ms
+        then:
+          - binary_sensor.template.publish:
+              id: button_1
+              state: ON
+      - timing:
+          - ON for at least 2s
+        then:
+          - binary_sensor.template.publish:
+              id: button_1_long_press
+              state: ON
+          - rtttl.play: "write:d=24,o=5,b=100:b"
+  - platform: template
+    name: "Button 1"
+    id: button_1
+    icon: "mdi:button-pointer"
+    publish_initial_state: true
+    on_press:
+      then:
+        - delay: 500ms
+        - binary_sensor.template.publish:
+            id: button_1
+            state: OFF
+  - platform: template
+    name: "Button 1 (long press)"
+    id: button_1_long_press
+    icon: "mdi:button-pointer"
+    publish_initial_state: true
+    on_press:
+      then:
+        - delay: 500ms
+        - binary_sensor.template.publish:
+            id: button_1_long_press
+            state: OFF
+
+  # --- Button 2 ---
+  - platform: gpio
+    name: "Button 2 (raw)"
+    id: button_2_raw
+    pin:
+      number: 14 # pin 5
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    internal: true
+    filters:
+      - delayed_on: 30ms
+      - delayed_off: 30ms
+    on_multi_click:
+      - timing:
+          - ON for 40ms to 400ms
+          - OFF for at least 330ms
+        then:
+          - binary_sensor.template.publish:
+              id: button_2
+              state: ON
+      - timing:
+          - ON for at least 2s
+        then:
+          - binary_sensor.template.publish:
+              id: button_2_long_press
+              state: ON
+          - rtttl.play: "write:d=24,o=5,b=100:b"
+  - platform: template
+    name: "Button 2"
+    id: button_2
+    icon: "mdi:button-pointer"
+    publish_initial_state: true
+    on_press:
+      then:
+        - delay: 500ms
+        - binary_sensor.template.publish:
+            id: button_2
+            state: OFF
+  - platform: template
+    name: "Button 2 (long press)"
+    id: button_2_long_press
+    icon: "mdi:button-pointer"
+    publish_initial_state: true
+    on_press:
+      then:
+        - delay: 500ms
+        - binary_sensor.template.publish:
+            id: button_2_long_press
+            state: OFF
+
+  # --- Button 3 ---
+  - platform: gpio
+    name: "Button 3 (raw)"
+    id: button_3_raw
+    pin:
+      number: 0 # pin 18
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    internal: true
+    filters:
+      - delayed_on: 30ms
+      - delayed_off: 30ms
+    on_multi_click:
+      - timing:
+          - ON for 40ms to 400ms
+          - OFF for at least 330ms
+        then:
+          - binary_sensor.template.publish:
+              id: button_3
+              state: ON
+      - timing:
+          - ON for at least 2s
+        then:
+          - binary_sensor.template.publish:
+              id: button_3_long_press
+              state: ON
+          - rtttl.play: "write:d=24,o=5,b=100:b"
+  - platform: template
+    name: "Button 3"
+    id: button_3
+    icon: "mdi:button-pointer"
+    publish_initial_state: true
+    on_press:
+      then:
+        - delay: 500ms
+        - binary_sensor.template.publish:
+            id: button_3
+            state: OFF
+  - platform: template
+    name: "Button 3 (long press)"
+    id: button_3_long_press
+    icon: "mdi:button-pointer"
+    publish_initial_state: true
+    on_press:
+      then:
+        - delay: 500ms
+        - binary_sensor.template.publish:
+            id: button_3_long_press
+            state: OFF
+
+  # --- Button 4 (toggle) ---
+  - platform: gpio
+    name: "Button 4 (toggle button)"
+    id: button_4_toggle
+    pin:
+      number: 16 # pin 4
+      inverted: false
+      mode:
+        input: true
+        pulldown: true
+    icon: "mdi:toggle-switch"
 
 text_sensor:
   - platform: version
