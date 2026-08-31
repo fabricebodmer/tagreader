@@ -364,7 +364,7 @@ pn532_i2c:
         condition:
           switch.is_on: buzzer_enabled
         then:
-        - rtttl.play: "success:d=32,o=5,b=100:c,g,b"
+        - rtttl.play: "success:d=16,o=5,b=120:c,g6"
   on_tag_removed:
     then:
     - homeassistant.event:
