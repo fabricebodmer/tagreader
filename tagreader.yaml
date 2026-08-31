@@ -6,6 +6,9 @@ wifi:
   ap:
     ssid: ${name}
 
+web_server:
+  port: 80
+
 # Enable the captive portal for inital WiFi setup
 captive_portal:
 
@@ -149,6 +152,8 @@ logger:
 
 # Enable Home Assistant API
 api:
+  encryption:
+    key: !secret api_encryption_key
   services:
   - service: rfidreader_tag_ok
     then:
