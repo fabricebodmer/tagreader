@@ -369,7 +369,7 @@ pn532_i2c:
         condition:
           switch.is_on: buzzer_enabled
         then:
-        - rtttl.play: "success:d=4,o=4,b=100:c,g"
+        - rtttl.play: "success:d=32,o=5,b=100:c,g,b"
   on_tag_removed:
     then:
     - homeassistant.event:
@@ -578,7 +578,6 @@ text_sensor:
 # Define buzzer as output for RTTTL
 rtttl:
   output: buzzer
-  gain: 0.3
 
 # Configure LED
 light:
