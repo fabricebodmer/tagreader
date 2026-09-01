@@ -46,6 +46,26 @@ condition:
   - condition: template
     value_template: "{{ (trigger.event.data.reader|upper) == (reader|upper) }}"
 action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ true }}"
+        sequence: !input custom_actions
+  - if:
+      - condition: template
+        value_template: "{{ (target_script | default(none)) is not none }}"
+    then:
+      - service: script.turn_on
+        target:
+          entity_id: !input target_script
+        data:
+          variables:
+            tag_id: "{{ trigger.event.data.tag_id }}"
+            uid: "{{ trigger.event.data.uid }}"
+            source: "{{ trigger.event.data.source }}"
+            url: "{{ trigger.event.data.url }}"
+            info: "{{ trigger.event.data.info }}"
+            reader: "{{ reader }}"
   - service: media_player.media_stop
     target:
       entity_id: !input player
@@ -119,25 +139,5 @@ action:
           enqueue: replace
         target:
           entity_id: !input player
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ true }}"
-        sequence: !input custom_actions
-  - if:
-      - condition: template
-        value_template: "{{ (target_script | default(none)) is not none }}"
-    then:
-      - service: script.turn_on
-        target:
-          entity_id: !input target_script
-        data:
-          variables:
-            tag_id: "{{ trigger.event.data.tag_id }}"
-            uid: "{{ trigger.event.data.uid }}"
-            source: "{{ trigger.event.data.source }}"
-            url: "{{ trigger.event.data.url }}"
-            info: "{{ trigger.event.data.info }}"
-            reader: "{{ reader }}"
 mode: queued
 max: 10
