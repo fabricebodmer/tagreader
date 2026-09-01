@@ -119,8 +119,11 @@ action:
           enqueue: replace
         target:
           entity_id: !input player
-  - if: []
-    then: !input custom_actions
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ true }}"
+        sequence: !input custom_actions
   - if:
       - condition: template
         value_template: "{{ (target_script | default(none)) is not none }}"
