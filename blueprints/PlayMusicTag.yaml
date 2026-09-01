@@ -15,10 +15,29 @@ blueprint:
       selector:
         entity:
           domain: media_player
+    custom_actions:
+      name: Actions personnalisées (optionnel)
+      description: >-
+        Actions supplémentaires à exécuter à chaque scan de tag sur ce lecteur,
+        en plus de la lecture musicale. Le contexte du trigger reste accessible
+        (trigger.event.data.tag_id, .uid, .source, .url, .info).
+      default: []
+      selector:
+        action: {}
+    target_script:
+      name: Script à exécuter (optionnel)
+      description: >-
+        Script réutilisable (partagé entre plusieurs lecteurs/blueprints)
+        appelé à chaque scan, avec les infos du tag passées en variables.
+      default: null
+      selector:
+        entity:
+          domain: script
 
 variables:
   device_id: !input reader_id
   reader: '{{ device_attr(device_id, "name") }}'
+  target_script: !input target_script
 
 trigger:
   - platform: event
@@ -100,5 +119,21 @@ action:
           enqueue: replace
         target:
           entity_id: !input player
+  - !input custom_actions
+  - if:
+      - condition: template
+        value_template: "{{ (target_script | default(none)) is not none }}"
+    then:
+      - service: script.turn_on
+        target:
+          entity_id: !input target_script
+        data:
+          variables:
+            tag_id: "{{ trigger.event.data.tag_id }}"
+            uid: "{{ trigger.event.data.uid }}"
+            source: "{{ trigger.event.data.source }}"
+            url: "{{ trigger.event.data.url }}"
+            info: "{{ trigger.event.data.info }}"
+            reader: "{{ reader }}"
 mode: queued
 max: 10
