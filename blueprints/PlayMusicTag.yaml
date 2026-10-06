@@ -139,5 +139,5 @@ action:
           enqueue: replace
         target:
           entity_id: !input player
-mode: queued
+mode: restart
 max: 10
